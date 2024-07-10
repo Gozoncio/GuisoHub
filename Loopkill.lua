@@ -5,7 +5,7 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
 })
 
 local h = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local e = h.CreateLib("Guiso's Gui", "WhiteTheme")
+local e = h.CreateLib("Guiso's Gui", "DarkTheme")
 local p = e:NewTab("Main")
 local eh = p:NewSection("Looking/AntiRagdoll/AntiFling")
 eh:NewButton("Activate", "Toggles Looping", function()
