@@ -8,9 +8,9 @@ local h = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo
 local e = h.CreateLib("Guiso's Gui", "DarkTheme")
 local p = e:NewTab("Main")
 local eh = p:NewSection("Looking/AntiRagdoll/AntiFling")
-eh:NewButton("Activate", "Toggles Looping", function()
+eh:NewButton("Activate", "Toggles Looking", function()
     game.StarterGui:SetCore("ChatMakeSystemMessage", {
-        Text = "Looping Enabled",
+        Text = "Looking Enabled",
         Color = Color3.fromRGB(227, 27, 27),
         Font = Enum.Font.GothamBold,
         FontSize = Enum.FontSize.Size18
