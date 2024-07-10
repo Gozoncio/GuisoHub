@@ -1,7 +1,7 @@
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "Gui By Guiso",
     Text = "Loading...",
-    Icon = "rbxassetid://105175546096"
+    Icon = "rbxassetid://570892809"
 })
 
 local h = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
