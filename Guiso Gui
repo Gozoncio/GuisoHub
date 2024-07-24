@@ -2,64 +2,65 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shl
 local Window = OrionLib:MakeWindow({Name = "Guiso's Gui", HidePremium = false, SaveConfig = true, IntroText = "Loading..",IntroIcon = "rbxassetid://570892809", ConfigFolder = "OrionTest"})
 
 local Tab1 = Window:MakeTab({
-	Name = "Loopkill By Guiso",
-	Icon = "rbxassetid://570892809",
-	PremiumOnly = false
+    Name = "Loopkill V1 And V2",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
 })
 
 OrionLib:MakeNotification({
-	Name = "Title!",
-	Content = "Notification content... what will it say??",
-	Image = "rbxassetid://570892809",
-	Time = 5
+    Name = "Title!",
+    Content = "Notification content... what will it say??",
+    Image = "rbxassetid://570892809",
+    Time = 5
 })
 
 Tab1:AddLabel("LoopV1/LoopV2/All Antifling")
 Tab1:AddButton({
-	Name = "Activate",
-	Callback = function()
+    Name = "Activate",
+    Callback = function()
         local prefix = '/'
  
         repeat wait() until game.Loaded
-        local plrs = game:GetService'Players'
+        local plrs = game:GetService("Players")
         local plr = plrs.LocalPlayer
         local loopall = false
         local whitelist = {}
         local loopKill = {}
+
         local function findplr(Target)
-            if game:GetService'Players':FindFirstChild(Target) then
-                return game:GetService'Players':FindFirstChild(Target)
+            if plrs:FindFirstChild(Target) then
+                return plrs:FindFirstChild(Target)
             else
-                if Target ~= nil and Target ~= "" and Target ~= " " and Target then
+                if Target and Target ~= "" and Target ~= " " then
                     local name = Target
-                    local found = false
-                    for _,v in pairs(game:GetService'Players':GetPlayers()) do 
-                        if not found and (v.Name:lower():sub(1,#name) == name:lower() or v.DisplayName:lower():sub(1,#name) == name:lower()) then
-                            name = v
-                            found = true
+                    for _, v in pairs(plrs:GetPlayers()) do 
+                        if v.Name:lower():sub(1,#name) == name:lower() or v.DisplayName:lower():sub(1,#name) == name:lower() then
+                            return v
                         end
                     end
-                    if name ~= nil and name ~= Target then
-                        return name
-                    end
                 end
             end
+            return nil
         end
-        plr.Chatted:connect(function(msg)
+
+        plr.Chatted:Connect(function(msg)
             msg = msg:lower():split(' ')
             if msg[1] == '/e' then
-                for i,v in next,msg do
-                    msg[i] = msg[i+1]
-                end
+                table.remove(msg, 1)
             end
+
             if msg[1] == prefix..'lka' or (msg[1] == prefix..'loop' and msg[2] == 'all') then
                 loopall = true
-            elseif msg[1] == prefix..'kill' and findplr(msg[2]) and not table.find(loopKill,findplr(msg[2]).Name) then
-                table.insert(loopKill,findplr(msg[2]).Name)
-            elseif msg[1] == prefix..'wl' and findplr(msg[2]) and not table.find(whitelist,findplr(msg[2]).Name) then
-                table.insert(whitelist,findplr(msg[2]).Name)
-            elseif msg[1] == prefix..'bl' and findplr(msg[2]) and table.find(whitelist,findplr(msg[2]).Name) then
-                table.remove(whitelist,findplr(msg[2]).Name)
+            elseif msg[1] == prefix..'stoploop' then
+                loopall = false
+                active = false
+                loopKill = {}
+            elseif msg[1] == prefix..'kill' and findplr(msg[2]) and not table.find(loopKill, findplr(msg[2]).Name) then
+                table.insert(loopKill, findplr(msg[2]).Name)
+            elseif msg[1] == prefix..'wl' and findplr(msg[2]) and not table.find(whitelist, findplr(msg[2]).Name) then
+                table.insert(whitelist, findplr(msg[2]).Name)
+            elseif msg[1] == prefix..'bl' and findplr(msg[2]) and table.find(whitelist, findplr(msg[2]).Name) then
+                table.remove(whitelist, table.find(whitelist, findplr(msg[2]).Name))
             elseif msg[1] == prefix..'resurrect' then
                 table.clear(loopKill)
                 loopall = false
@@ -68,58 +69,56 @@ Tab1:AddButton({
                 end)
             end
         end)
+
         spawn(function()
-            while true do wait()
+            while true do
+                wait(0.1)
                 pcall(function()
-                    if plr.Character.Ragdoll.Value then
+                    if plr.Character and plr.Character.Ragdoll and plr.Character.Ragdoll.Value then
                         plr.Character.GetUpEvent:FireServer()
                     end
                 end)
                 pcall(function()
-                    for _,_2 in next,plr.Character:GetChildren() do
-                        pcall(function()
-                            if _2:IsA'Accessory' and _2.Name ~= 'FakeAccessory' and _2:FindFirstChild'Handle' and _2.Handle:FindFirstChildOfClass'Weld' then
-                                local clone = _2:Clone()
-                                _2:Destroy()
+                    if plr.Character then
+                        for _, obj in ipairs(plr.Character:GetChildren()) do
+                            if obj:IsA('Accessory') and obj.Name ~= 'FakeAccessory' and obj:FindFirstChild('Handle') and obj.Handle:FindFirstChildOfClass('Weld') then
+                                local clone = obj:Clone()
+                                obj:Destroy()
                                 clone.Name = 'FakeAccessory'
                                 clone.Parent = plr.Character
+                            elseif obj.Name == 'VelocityDamage' or obj.Name == 'GetPicked' then
+                                obj:Destroy()
                             end
-                        end)
-                        pcall(function()
-                            if _2.Name == 'VelocityDamage' or _2.Name == 'GetPicked' then
-                                _2:Destroy()
-                            end
-                        end)
+                        end
                     end
-                end) 
+                end)
             end
         end)
-        while true do wait(0.1)
+
+        while true do
+            wait(0.1)
             if loopall then
-                for _,v in next,plrs:GetPlayers() do
-                    if v~=plr and not table.find(whitelist,v.Name) then
+                for _, v in pairs(plrs:GetPlayers()) do
+                    if v ~= plr and not table.find(whitelist, v.Name) then
                         pcall(function()
-                            plr.Character.Picking:FireServer(v.Character.HumanoidRootPart,Vector3.new(math.huge,-math.huge,math.huge))
+                            plr.Character.Picking:FireServer(v.Character.HumanoidRootPart, Vector3.new(math.huge, -math.huge, math.huge))
                             wait(0.05)
                             plr.Character.PuttingDown:FireServer()
                         end)
                     end
                 end
             end
-            if loopKill ~= {} then
-                for _,v in next,plrs:GetPlayers() do
-                    if table.find(loopKill,v.Name) then
-                        game:GetService("Workspace")[v.Name].ArmAngleChange:FireServer(CFrame.new(-math.huge, math.huge, -3, 0, .01, .1, 0, 0, 0, 0, 0, 1))
+            if #loopKill > 0 then
+                for _, v in pairs(plrs:GetPlayers()) do
+                    if table.find(loopKill, v.Name) then
                         pcall(function()
-                            local accs = v.Character:FindFirstChildOfClass'Accessory'
-                            if accs then
-                                if accs:FindFirstChild'Handle' then
-                                    plr.Character.Picking:FireServer(accs.Handle,Vector3.new(math.huge,-math.huge,math.huge))
-                                elseif accs:IsA'BasePart' then
-                                    plr.Character.Picking:FireServer(accs,Vector3.new(math.huge,-math.huge,math.huge))
-                                end
+                            local accs = v.Character:FindFirstChildOfClass('Accessory')
+                            if accs and accs:FindFirstChild('Handle') then
+                                plr.Character.Picking:FireServer(accs.Handle, Vector3.new(math.huge, -math.huge, math.huge))
+                            elseif accs and accs:IsA('BasePart') then
+                                plr.Character.Picking:FireServer(accs, Vector3.new(math.huge, -math.huge, math.huge))
                             else
-                                plr.Character.Picking:FireServer(v.Character.HumanoidRootPart,Vector3.new(math.huge,-math.huge,math.huge))
+                                plr.Character.Picking:FireServer(v.Character.HumanoidRootPart, Vector3.new(math.huge, -math.huge, math.huge))
                                 wait(0.1)
                                 plr.Character.PuttingDown:FireServer()
                             end
@@ -128,58 +127,72 @@ Tab1:AddButton({
                 end
             end
         end
-        end    
+    end    
 })
 
 Tab1:AddButton({
-	Name = "Loop All V1 & V2",
-	Callback = function()
-      	game.Players:Chat("/lka")
-  	end    
+    Name = "Loop All V1 & V2",
+    Callback = function()
+        game.Players:Chat("/lka")
+    end    
 })
+
+Tab1:AddButton({
+    Name = "Stop Loop",
+    Callback = function()
+        game.Players:Chat("/stoploop")
+    end    
+})
+
 Tab1:AddLabel("Loop All V1 & V2 is best")
 local player = game.Players.LocalPlayer
+
 Tab1:AddTextbox({
-	Name = "Target Name",
-	Default = "",
-	TextDisappear = true,
-	Callback = function(Value)
-		game.Players:Chat('/kill '..Value)
-	end	  
+    Name = "Target Name",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(Value)
+        game.Players:Chat('/kill '..Value)
+    end
 })
+
 Tab1:AddToggle({
-	Name = "Secret Loop",
-	Default = false,
-	Callback = function(Value)
-		hiddenloop = Value
-	end    
+    Name = "Secret Loop",
+    Default = false,
+    Callback = function(Value)
+        hiddenloop = Value
+    end
 })
+
 spawn(function()
     while true do
         pcall(function()
-            player.Character.ArmAngle.Disabled = hiddenloop
+            if player.Character then
+                player.Character.ArmAngle.Disabled = hiddenloop
+            end
             wait(0.3)
         end)
     end
 end)
+
 Tab1:AddLabel("Whitelist/Blacklist")
+
 Tab1:AddTextbox({
-	Name = "Whitelist",
-	Default = "",
-	TextDisappear = true,
-	Callback = function(Value)
-		game.Players:Chat('/wl '..Value)
-	end	  
+    Name = "Whitelist",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(Value)
+        game.Players:Chat('/wl '..Value)
+    end
 })
 
-
 Tab1:AddTextbox({
-	Name = "Blacklist",
-	Default = "",
-	TextDisappear = true,
-	Callback = function(Value)
-		game.Players:Chat('/bl '..Value)
-	end	  
+    Name = "Blacklist",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(Value)
+        game.Players:Chat('/bl '..Value)
+    end
 })
 --tab 2
 
@@ -289,12 +302,12 @@ end)
 })
 
 
-Tab2:AddLabel("Exes Yield")
+Tab2:AddLabel("Guiso's Yield")
 
 Tab2:AddButton({
 	Name = "Activate",
 	Callback = function()
-      		loadstring(game:HttpGet('https://[Log in to view URL]'))()
+      		loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
   	end    
 })
 
@@ -389,7 +402,7 @@ Tab2:AddLabel("Rejoin")
 Tab2:AddButton({
 	Name = "Activate",
 	Callback = function()
-      		loadstring(game:HttpGet("https://[Log in to view URL]"))()
+      		loadstring(game:HttpGet("https://pastebin.com/raw/1gtVMUz3"))()
   	end    
 })
 
@@ -397,7 +410,7 @@ Tab2:AddButton({
 
 
 local Tab3 = Window:MakeTab({
-	Name = "Keybind",
+	Name = "Keybinds",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
@@ -462,7 +475,7 @@ if mouse.Target:FindFirstAncestorOfClass('Model') and mouse.Target:FindFirstAnce
 
 
 Tab3:AddBind({
-	Name = "Grab Anywhere",
+	Name = "Pick Script",
 	Default = Enum.KeyCode.Q,
 	Hold = false,
 	Callback = function()
@@ -536,7 +549,7 @@ end)
   	end    
 })
 
-local Tab6 = window:MakeTab({
+local Tab6 = Window:MakeTab({
 	Name = "Miscs",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
@@ -582,7 +595,7 @@ game.Players.LocalPlayer.Character.HeadWaist:FireServer(CFrame.new(0, 0.8, .05, 
 })
 
 Tab6:AddButton({
-	Name = "Dog Reposition",
+	Name = "Arm Reposition",
 	Callback = function()
 game.Players.LocalPlayer.Character.HeadWaist:FireServer(CFrame.new(-6.79650398e-08, 0.86, -.1, 0.99993664, 8.12966027e-06, 0.0112577537, 0.000602641259, 0.998527229, -0.0542489029, -0.0112416157, 0.0542522483, 0),CFrame.new(-0.116010524, .92, -.1, 10.999984026, 0, 0.00565499254, 0.000201625779, 10.999344885, -0.0361913592, -0.00565139763, 0.036191918, 10.999328911))
 game.Players.LocalPlayer.Character.ArmAngleChange:FireServer(CFrame.new(1.08069849, 0.17757228, 0.106126301, 1, 0, 0, 0, 1, 0, 0, 0, 1))
@@ -591,7 +604,7 @@ game.Players.LocalPlayer.Character.ArmAngleChange:FireServer(CFrame.new(1.080698
 
 
 Tab6:AddButton({
-	Name = "Ex3 Trail",
+	Name = "Guiso's Trail",
 	Callback = function()
       		local Players = game:GetService("Players")
 
@@ -618,7 +631,7 @@ local trail = Instance.new("Trail")
 trail.Parent = head
 trail.Attachment0 = attachment0
 trail.Attachment1 = attachment1
-trail.Texture = "rbxassetid://10907975245"
+trail.Texture = "rbxassetid://11104447804"
 trail.TextureMode = "Wrap"
 trail.MaxLength = 10
 trail.Lifetime = 3
